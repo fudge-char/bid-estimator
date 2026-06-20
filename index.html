@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Bid Estimator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.75rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6366f1;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card h2 .icon {
+      font-size: 1.1rem;
+    }
+
+    .field-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #1a1a2e;
+      background: #fafafa;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+      background: #fff;
+    }
+
+    .personnel-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      align-items: end;
+    }
+
+    .personnel-row .remove-btn {
+      grid-column: span 2;
+      justify-self: end;
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 0;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-top: -0.25rem;
+    }
+
+    .personnel-row .remove-btn:hover { color: #b91c1c; }
+
+    .add-btn {
+      width: 100%;
+      padding: 0.55rem;
+      background: #f5f3ff;
+      border: 1.5px dashed #a5b4fc;
+      border-radius: 8px;
+      color: #6366f1;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.25rem;
+    }
+
+    .add-btn:hover { background: #ede9fe; }
+
+    .timeframe-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .timeframe-grid .field-group { margin-bottom: 0; }
+
+    .markup-input-wrap {
+      position: relative;
+    }
+
+    .markup-input-wrap input {
+      padding-right: 2rem;
+    }
+
+    .markup-input-wrap .suffix {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Output section spans full width */
+    .output-section {
+      grid-column: 1 / -1;
+    }
+
+    .charge-rate-box {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      padding: 1.25rem 1.75rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .charge-rate-box .label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0.85;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .charge-rate-box .amount {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .charge-rate-box .sub {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 0.15rem;
+    }
+
+    .bid-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.6rem;
+    }
+
+    .bid-table thead th {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9ca3af;
+      padding: 0 1rem 0.5rem;
+      text-align: left;
+    }
+
+    .bid-table thead th:first-child { padding-left: 1.25rem; }
+
+    .bid-table tbody tr {
+      background: #f9fafb;
+      border-radius: 10px;
+    }
+
+    .bid-table tbody tr.tier-best { background: #f0fdf4; }
+    .bid-table tbody tr.tier-better { background: #eff6ff; }
+    .bid-table tbody tr.tier-good { background: #fff7ed; }
+
+    .bid-table tbody td {
+      padding: 1rem;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    .bid-table tbody td:first-child {
+      padding-left: 1.25rem;
+      border-radius: 10px 0 0 10px;
+    }
+
+    .bid-table tbody td:last-child {
+      border-radius: 0 10px 10px 0;
+      padding-right: 1.25rem;
+    }
+
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tier-best .tier-badge { background: #dcfce7; color: #16a34a; }
+    .tier-better .tier-badge { background: #dbeafe; color: #1d4ed8; }
+    .tier-good .tier-badge { background: #ffedd5; color: #c2410c; }
+
+    .scenario-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1a1a2e;
+    }
+
+    .scenario-sub {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.1rem;
+    }
+
+    .num { font-weight: 700; font-size: 1rem; }
+    .num.profit-pos { color: #16a34a; }
+    .num.profit-neg { color: #dc2626; }
+
+    .divider {
+      border: none;
+      border-top: 1.5px solid #f3f4f6;
+      margin: 1.25rem 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #d1d5db;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Project Bid Estimator</h1>
+    <p>Calculate client charge rates and scenario profitability in seconds.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- Labor Card -->
+    <div class="card">
+      <h2><span class="icon">👷</span> Labor</h2>
+
+      <div id="personnel-list"></div>
+
+      <button class="add-btn" id="add-personnel-btn" onclick="addPersonnel()">+ Add Personnel</button>
+
+      <hr class="divider" />
+
+      <div class="field-group">
+        <label>Markup on Daily Rate</label>
+        <div class="markup-input-wrap">
+          <input type="number" id="markup" min="0" max="999" step="0.1" value="20" oninput="calculate()" />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeframe Card -->
+    <div class="card">
+      <h2><span class="icon">📅</span> Project Timeframe</h2>
+
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;margin-bottom:0.75rem;">Day Count</div>
+      <div class="timeframe-grid">
+        <div class="field-group">
+          <label>Under</label>
+          <input type="number" id="days-under" min="0" step="1" placeholder="0" oninput="calculate()" />
+        </div>
+        <div class="field-group">
+          <label>Fair</label>
+          <input type="number" id="days-avg" min="0" step="1" placeholder="0" oninput="calculate()" />
+        </div>
+        <div class="field-group">
+          <label>Over</label>
+          <input type="number" id="days-over" min="0" step="1" placeholder="0" oninput="calculate()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="card output-section">
+      <h2><span class="icon">📊</span> Bid Summary</h2>
+
+      <div class="charge-rate-box">
+        <div>
+          <div class="label">Fixed Client Charge (based on fair timeline)</div>
+          <div class="sub">Labor × Markup × Fair Days</div>
+        </div>
+        <div style="text-align:right">
+          <div class="amount" id="charge-rate-display">—</div>
+        </div>
+      </div>
+
+      <div id="table-wrap">
+        <div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let personnelCount = 0;
+
+    function addPersonnel() {
+      if (personnelCount >= 5) return;
+      personnelCount++;
+
+      const list = document.getElementById('personnel-list');
+      const id = personnelCount;
+
+      const row = document.createElement('div');
+      row.className = 'personnel-row';
+      row.id = `person-row-${id}`;
+      row.innerHTML = `
+        <div class="field-group">
+          <label>Person ${id} — Daily Rate</label>
+          <div class="markup-input-wrap">
+            <input type="number" id="rate-${id}" min="0" step="0.01" placeholder="0 ECD" oninput="calculate()" />
+            <span class="suffix">$</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:0.05rem;">
+          ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : '<span></span>'}
+        </div>
+      `;
+
+      list.appendChild(row);
+      updateAddButton();
+      calculate();
+    }
+
+    function removePersonnel(id) {
+      const row = document.getElementById(`person-row-${id}`);
+      if (row) row.remove();
+      personnelCount = document.querySelectorAll('.personnel-row').length;
+      updateAddButton();
+      calculate();
+    }
+
+    function updateAddButton() {
+      const btn = document.getElementById('add-personnel-btn');
+      const count = document.querySelectorAll('.personnel-row').length;
+      btn.disabled = count >= 5;
+      btn.style.opacity = count >= 5 ? '0.4' : '1';
+    }
+
+    function fmt(n) {
+      return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    }
+
+    function calculate() {
+      const markup = parseFloat(document.getElementById('markup').value) || 0;
+      const daysUnder = parseFloat(document.getElementById('days-under').value);
+      const daysAvg   = parseFloat(document.getElementById('days-avg').value);
+      const daysOver  = parseFloat(document.getElementById('days-over').value);
+
+      let totalDailyLabor = 0;
+      document.querySelectorAll('input[id^="rate-"]').forEach(input => {
+        totalDailyLabor += parseFloat(input.value) || 0;
+      });
+
+      const chargeDisplay = document.getElementById('charge-rate-display');
+      const tableWrap = document.getElementById('table-wrap');
+
+      const markedUpDailyRate = totalDailyLabor * (1 + markup / 100);
+      const hasAvg = !isNaN(daysAvg) && daysAvg > 0;
+      const hasRates = totalDailyLabor > 0;
+
+      if (!hasRates || !hasAvg) {
+        chargeDisplay.textContent = '—';
+        tableWrap.innerHTML = '<div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>';
+        return;
+      }
+
+      const fixedClientCharge = markedUpDailyRate * daysAvg;
+      chargeDisplay.textContent = fmt(fixedClientCharge);
+
+      const scenarios = [];
+
+      if (!isNaN(daysUnder) && daysUnder > 0) {
+        const labor = totalDailyLabor * daysUnder;
+        scenarios.push({ tier: 'best', label: 'Under Estimate', days: daysUnder, labor, profit: fixedClientCharge - labor });
+      }
+
+      if (hasAvg) {
+        const labor = totalDailyLabor * daysAvg;
+        scenarios.push({ tier: 'better', label: 'Fair Estimate', days: daysAvg, labor, profit: fixedClientCharge - labor });
+      }
+
+      if (!isNaN(daysOver) && daysOver > 0) {
+        const labor = totalDailyLabor * daysOver;
+        scenarios.push({ tier: 'good', label: 'Over Estimate', days: daysOver, labor, profit: fixedClientCharge - labor });
+      }
+
+      if (scenarios.length === 0) {
+        tableWrap.innerHTML = '<div class="empty-state">Enter at least one timeframe scenario.</div>';
+        return;
+      }
+
+      const tierLabel = { best: '⭐ Best', better: '✓ Better', good: '△ Good' };
+
+      const rows = scenarios.map(s => `
+        <tr class="tier-${s.tier}">
+          <td><span class="tier-badge">${tierLabel[s.tier]}</span></td>
+          <td>
+            <div class="scenario-label">${s.label}</div>
+            <div class="scenario-sub">Client billed ${fmt(fixedClientCharge)} regardless</div>
+          </td>
+          <td class="num">${s.days}</td>
+          <td class="num">${fmt(s.labor)}</td>
+          <td class="num ${s.profit >= 0 ? 'profit-pos' : 'profit-neg'}">${fmt(s.profit)}</td>
+        </tr>
+      `).join('');
+
+      tableWrap.innerHTML = `
+        <table class="bid-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Description</th>
+              <th>Days</th>
+              <th>Labor Cost</th>
+              <th>Profit</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // Init with one person
+    addPersonnel();
+  </script>
+
+</body>
+</html>
