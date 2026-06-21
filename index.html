@@ -82,7 +82,7 @@
       letter-spacing: 0.05em;
     }
 
-    input[type="number"], input[type="text"] {
+    input[type="number"], input[type="text"], input[type="date"] {
       width: 100%;
       padding: 0.6rem 0.85rem;
       border: 1.5px solid #e5e7eb;
@@ -94,22 +94,39 @@
       outline: none;
     }
 
-    input[type="number"]:focus, input[type="text"]:focus {
+    input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus {
       border-color: #6366f1;
       box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
       background: #fff;
     }
 
+    /* Personnel rows now 4-column: name | rate | daily profit | client rate */
     .personnel-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 0.6rem;
       margin-bottom: 0.75rem;
       align-items: end;
     }
 
+    .personnel-col-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .personnel-col-header span {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      padding: 0 0.1rem;
+    }
+
     .personnel-row .remove-btn {
-      grid-column: span 2;
+      grid-column: span 4;
       justify-self: end;
       background: none;
       border: none;
@@ -123,6 +140,24 @@
     }
 
     .personnel-row .remove-btn:hover { color: #b91c1c; }
+
+    .derived-field {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #374151;
+      background: #f3f4f6;
+      text-align: right;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .derived-field.profit { color: #16a34a; }
 
     .add-btn {
       width: 100%;
@@ -148,8 +183,41 @@
 
     .timeframe-grid .field-group { margin-bottom: 0; }
 
+    .finish-date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .finish-date-box {
+      background: #f5f3ff;
+      border: 1.5px solid #c4b5fd;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+    }
+
+    .finish-date-box .fd-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #7c3aed;
+      margin-bottom: 0.2rem;
+    }
+
+    .finish-date-box .fd-value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .finish-date-box .fd-value.empty { color: #c4b5fd; font-weight: 400; font-style: italic; }
+
     .markup-input-wrap {
       position: relative;
+      max-width: 120px;
     }
 
     .markup-input-wrap input {
@@ -228,8 +296,8 @@
     }
 
     .bid-table tbody tr.tier-best { background: #f0fdf4; }
-    .bid-table tbody tr.tier-better { background: #eff6ff; }
-    .bid-table tbody tr.tier-good { background: #fff7ed; }
+    .bid-table tbody tr.tier-fair { background: #eff6ff; }
+    .bid-table tbody tr.tier-caution { background: #fff7ed; }
 
     .bid-table tbody td {
       padding: 1rem;
@@ -260,8 +328,8 @@
     }
 
     .tier-best .tier-badge { background: #dcfce7; color: #16a34a; }
-    .tier-better .tier-badge { background: #dbeafe; color: #1d4ed8; }
-    .tier-good .tier-badge { background: #ffedd5; color: #c2410c; }
+    .tier-fair .tier-badge { background: #dbeafe; color: #1d4ed8; }
+    .tier-caution .tier-badge { background: #ffedd5; color: #c2410c; }
 
     .scenario-label {
       font-weight: 700;
@@ -291,6 +359,15 @@
       padding: 2rem;
       font-size: 0.9rem;
     }
+
+    .section-sub-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #9ca3af;
+      margin-bottom: 0.75rem;
+    }
   </style>
 </head>
 <body>
@@ -302,9 +379,16 @@
 
   <div class="layout">
 
-    <!-- Labor Card -->
+    <!-- Raw Labor Card -->
     <div class="card">
-      <h2><span class="icon">👷</span> Labor</h2>
+      <h2><span class="icon">🛠️</span> Raw Labor</h2>
+
+      <div class="personnel-col-header">
+        <span>Person / Daily Rate</span>
+        <span></span>
+        <span>Daily Profit</span>
+        <span>Client Rate</span>
+      </div>
 
       <div id="personnel-list"></div>
 
@@ -315,7 +399,7 @@
       <div class="field-group">
         <label>Markup on Daily Rate</label>
         <div class="markup-input-wrap">
-          <input type="number" id="markup" min="0" max="999" step="0.1" value="20" oninput="calculate()" />
+          <input type="number" id="markup" min="0" max="999" step="0.1" value="15" oninput="calculate()" />
           <span class="suffix">%</span>
         </div>
       </div>
@@ -325,19 +409,39 @@
     <div class="card">
       <h2><span class="icon">📅</span> Project Timeframe</h2>
 
-      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;margin-bottom:0.75rem;">Day Count</div>
+      <div class="field-group" style="margin-bottom:1rem;">
+        <label>Start Date</label>
+        <input type="date" id="start-date" oninput="calculate()" />
+      </div>
+
+      <div class="section-sub-label">Estimated Days to Completion</div>
       <div class="timeframe-grid">
         <div class="field-group">
-          <label>Under</label>
+          <label>🐇 Speedy</label>
           <input type="number" id="days-under" min="0" step="1" placeholder="0" oninput="calculate()" />
         </div>
         <div class="field-group">
-          <label>Fair</label>
+          <label>🤝 Fair</label>
           <input type="number" id="days-avg" min="0" step="1" placeholder="0" oninput="calculate()" />
         </div>
         <div class="field-group">
-          <label>Over</label>
+          <label>🐢 Slow</label>
           <input type="number" id="days-over" min="0" step="1" placeholder="0" oninput="calculate()" />
+        </div>
+      </div>
+
+      <div class="finish-date-row" id="finish-dates">
+        <div class="finish-date-box">
+          <div class="fd-label">🐇 Finish Date</div>
+          <div class="fd-value empty" id="fd-under">—</div>
+        </div>
+        <div class="finish-date-box">
+          <div class="fd-label">🤝 Finish Date</div>
+          <div class="fd-value empty" id="fd-avg">—</div>
+        </div>
+        <div class="finish-date-box">
+          <div class="fd-label">🐢 Finish Date</div>
+          <div class="fd-value empty" id="fd-over">—</div>
         </div>
       </div>
     </div>
@@ -366,6 +470,36 @@
   <script>
     let personnelCount = 0;
 
+    // Set start date default to today in YYYY-MM-DD for the date input
+    (function() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('start-date').value = `${yyyy}-${mm}-${dd}`;
+    })();
+
+    function addWorkingDays(startDate, days) {
+      if (!startDate || isNaN(days) || days <= 0) return null;
+      let date = new Date(startDate);
+      // Move past start day — finish date is end of the last working day
+      let added = 0;
+      while (added < days) {
+        date.setDate(date.getDate() + 1);
+        const dow = date.getDay();
+        if (dow !== 0 && dow !== 6) added++;
+      }
+      return date;
+    }
+
+    function fmtDate(date) {
+      if (!date) return '—';
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
     function addPersonnel() {
       if (personnelCount >= 5) return;
       personnelCount++;
@@ -377,16 +511,22 @@
       row.className = 'personnel-row';
       row.id = `person-row-${id}`;
       row.innerHTML = `
-        <div class="field-group">
+        <div class="field-group" style="margin-bottom:0;grid-column:span 2;">
           <label>Person ${id} — Daily Rate</label>
-          <div class="markup-input-wrap">
-            <input type="number" id="rate-${id}" min="0" step="0.01" placeholder="0 ECD" oninput="calculate()" />
-            <span class="suffix">$</span>
+          <div style="position:relative;">
+            <input type="number" id="rate-${id}" min="0" step="0.01" placeholder="0 XCD" oninput="calculate()" style="padding-right:2rem;" />
+            <span style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.9rem;pointer-events:none;">$</span>
           </div>
         </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:0.05rem;">
-          ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : '<span></span>'}
+        <div class="field-group" style="margin-bottom:0;">
+          <label style="visibility:hidden;">Profit</label>
+          <div class="derived-field profit" id="profit-${id}">—</div>
         </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <label style="visibility:hidden;">Client</label>
+          <div class="derived-field" id="client-rate-${id}">—</div>
+        </div>
+        ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : ''}
       `;
 
       list.appendChild(row);
@@ -418,11 +558,41 @@
       const daysUnder = parseFloat(document.getElementById('days-under').value);
       const daysAvg   = parseFloat(document.getElementById('days-avg').value);
       const daysOver  = parseFloat(document.getElementById('days-over').value);
+      const startDateVal = document.getElementById('start-date').value;
+      const startDate = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
 
+      // Update per-person derived columns
       let totalDailyLabor = 0;
       document.querySelectorAll('input[id^="rate-"]').forEach(input => {
-        totalDailyLabor += parseFloat(input.value) || 0;
+        const rawId = input.id.replace('rate-', '');
+        const rate = parseFloat(input.value) || 0;
+        totalDailyLabor += rate;
+        const dailyProfit = rate * (markup / 100);
+        const clientRate = rate + dailyProfit;
+        const profitEl = document.getElementById(`profit-${rawId}`);
+        const clientEl = document.getElementById(`client-rate-${rawId}`);
+        if (profitEl) profitEl.textContent = rate > 0 ? fmt(dailyProfit) : '—';
+        if (clientEl) clientEl.textContent = rate > 0 ? fmt(clientRate) : '—';
       });
+
+      // Update finish dates
+      const fdUnder = document.getElementById('fd-under');
+      const fdAvg   = document.getElementById('fd-avg');
+      const fdOver  = document.getElementById('fd-over');
+
+      function setFd(el, days) {
+        const d = addWorkingDays(startDate, days);
+        if (d) {
+          el.textContent = fmtDate(d);
+          el.classList.remove('empty');
+        } else {
+          el.textContent = '—';
+          el.classList.add('empty');
+        }
+      }
+      setFd(fdUnder, daysUnder);
+      setFd(fdAvg, daysAvg);
+      setFd(fdOver, daysOver);
 
       const chargeDisplay = document.getElementById('charge-rate-display');
       const tableWrap = document.getElementById('table-wrap');
@@ -444,17 +614,17 @@
 
       if (!isNaN(daysUnder) && daysUnder > 0) {
         const labor = totalDailyLabor * daysUnder;
-        scenarios.push({ tier: 'best', label: 'Under Estimate', days: daysUnder, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'best', label: 'Speedy Work Estimate', days: daysUnder, labor, profit: fixedClientCharge - labor });
       }
 
       if (hasAvg) {
         const labor = totalDailyLabor * daysAvg;
-        scenarios.push({ tier: 'better', label: 'Fair Estimate', days: daysAvg, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'fair', label: 'Fair Estimate', days: daysAvg, labor, profit: fixedClientCharge - labor });
       }
 
       if (!isNaN(daysOver) && daysOver > 0) {
         const labor = totalDailyLabor * daysOver;
-        scenarios.push({ tier: 'good', label: 'Over Estimate', days: daysOver, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'caution', label: 'Slow Work Estimate', days: daysOver, labor, profit: fixedClientCharge - labor });
       }
 
       if (scenarios.length === 0) {
@@ -462,7 +632,7 @@
         return;
       }
 
-      const tierLabel = { best: '⭐ Best', better: '✓ Better', good: '△ Good' };
+      const tierLabel = { best: '🐇 Best', fair: '🤝 Fair', caution: '🐢 Caution' };
 
       const rows = scenarios.map(s => `
         <tr class="tier-${s.tier}">
