@@ -465,6 +465,46 @@
       letter-spacing: 0.05em;
     }
 
+    /* ── Signature pad ── */
+    .sig-canvas-wrap {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    #sig-canvas {
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      background: #fafafa;
+      cursor: crosshair;
+      display: block;
+      width: 100%;
+      height: 110px;
+      touch-action: none;
+    }
+
+    #sig-canvas.signed { background: #fff; }
+
+    .sig-clear-btn {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      background: none;
+      border: none;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #9ca3af;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+    }
+
+    .sig-clear-btn:hover { color: #ef4444; }
+
+    @media print {
+      .sig-clear-btn { display: none !important; }
+      #sig-canvas { border: 1px solid #d1d5db !important; background: #fff !important; }
+    }
+
     /* ── Project Materials table ── */
     .materials-table {
       width: 100%;
@@ -704,7 +744,11 @@
 
     <div class="sig-row">
       <div>
-        <div class="sig-line">Contractor Signature</div>
+        <label style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#374151;margin-bottom:0.4rem;display:block;">Contractor Signature</label>
+        <div class="sig-canvas-wrap">
+          <canvas id="sig-canvas" width="420" height="110"></canvas>
+          <button class="sig-clear-btn" onclick="clearSig()">✕ Clear</button>
+        </div>
       </div>
       <div>
         <div class="sig-line">Date</div>
@@ -911,6 +955,60 @@
     }
 
     addPersonnel();
+
+    // ── Signature pad ──
+    (function () {
+      const canvas = document.getElementById('sig-canvas');
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+      let lastX = 0, lastY = 0;
+
+      function scaledPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width  / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const src = e.touches ? e.touches[0] : e;
+        return [(src.clientX - rect.left) * scaleX, (src.clientY - rect.top) * scaleY];
+      }
+
+      function startDraw(e) {
+        e.preventDefault();
+        drawing = true;
+        [lastX, lastY] = scaledPos(e);
+        canvas.classList.add('signed');
+      }
+
+      function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const [x, y] = scaledPos(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = '#1a1a2e';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        [lastX, lastY] = [x, y];
+      }
+
+      function endDraw() { drawing = false; }
+
+      canvas.addEventListener('mousedown',  startDraw);
+      canvas.addEventListener('mousemove',  draw);
+      canvas.addEventListener('mouseup',    endDraw);
+      canvas.addEventListener('mouseleave', endDraw);
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove',  draw,      { passive: false });
+      canvas.addEventListener('touchend',   endDraw);
+    })();
+
+    function clearSig() {
+      const canvas = document.getElementById('sig-canvas');
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      canvas.classList.remove('signed');
+    }
   </script>
 
 </body>
