@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project Bid Estimator</title>
+  <title>Customer Quote</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,9 +15,40 @@
       padding: 2rem 1rem;
     }
 
+    /* ── Print button (screen only) ── */
+    .print-btn {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.5rem;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+      z-index: 100;
+      transition: background 0.15s;
+    }
+    .print-btn:hover { background: #4f46e5; }
+
     .page-header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .page-header .quote-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6366f1;
+      margin-bottom: 0.35rem;
     }
 
     .page-header h1 {
@@ -33,6 +64,18 @@
       font-size: 0.95rem;
     }
 
+    /* Job Name / Scope strip */
+    .meta-strip {
+      max-width: 1100px;
+      margin: 0 auto 1.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .meta-strip .field-group { margin-bottom: 0; }
+
     .layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -43,6 +86,7 @@
 
     @media (max-width: 768px) {
       .layout { grid-template-columns: 1fr; }
+      .meta-strip { grid-template-columns: 1fr; }
     }
 
     .card {
@@ -64,13 +108,9 @@
       gap: 0.5rem;
     }
 
-    .card h2 .icon {
-      font-size: 1.1rem;
-    }
+    .card h2 .icon { font-size: 1.1rem; }
 
-    .field-group {
-      margin-bottom: 1rem;
-    }
+    .field-group { margin-bottom: 1rem; }
 
     label {
       display: block;
@@ -100,7 +140,27 @@
       background: #fff;
     }
 
-    /* Personnel rows now 4-column: name | rate | daily profit | client rate */
+    textarea {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #1a1a2e;
+      background: #fafafa;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+      background: #fff;
+    }
+
+    /* Personnel */
     .personnel-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -175,6 +235,7 @@
 
     .add-btn:hover { background: #ede9fe; }
 
+    /* Timeframe */
     .timeframe-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -220,9 +281,7 @@
       max-width: 120px;
     }
 
-    .markup-input-wrap input {
-      padding-right: 2rem;
-    }
+    .markup-input-wrap input { padding-right: 2rem; }
 
     .markup-input-wrap .suffix {
       position: absolute;
@@ -234,10 +293,8 @@
       pointer-events: none;
     }
 
-    /* Output section spans full width */
-    .output-section {
-      grid-column: 1 / -1;
-    }
+    /* Output */
+    .output-section { grid-column: 1 / -1; }
 
     .charge-rate-box {
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
@@ -290,13 +347,9 @@
 
     .bid-table thead th:first-child { padding-left: 1.25rem; }
 
-    .bid-table tbody tr {
-      background: #f9fafb;
-      border-radius: 10px;
-    }
-
-    .bid-table tbody tr.tier-best { background: #f0fdf4; }
-    .bid-table tbody tr.tier-fair { background: #eff6ff; }
+    .bid-table tbody tr { background: #f9fafb; border-radius: 10px; }
+    .bid-table tbody tr.tier-best    { background: #f0fdf4; }
+    .bid-table tbody tr.tier-fair    { background: #eff6ff; }
     .bid-table tbody tr.tier-caution { background: #fff7ed; }
 
     .bid-table tbody td {
@@ -305,15 +358,8 @@
       vertical-align: middle;
     }
 
-    .bid-table tbody td:first-child {
-      padding-left: 1.25rem;
-      border-radius: 10px 0 0 10px;
-    }
-
-    .bid-table tbody td:last-child {
-      border-radius: 0 10px 10px 0;
-      padding-right: 1.25rem;
-    }
+    .bid-table tbody td:first-child  { padding-left: 1.25rem; border-radius: 10px 0 0 10px; }
+    .bid-table tbody td:last-child   { border-radius: 0 10px 10px 0; padding-right: 1.25rem; }
 
     .tier-badge {
       display: inline-flex;
@@ -327,21 +373,12 @@
       letter-spacing: 0.06em;
     }
 
-    .tier-best .tier-badge { background: #dcfce7; color: #16a34a; }
-    .tier-fair .tier-badge { background: #dbeafe; color: #1d4ed8; }
+    .tier-best    .tier-badge { background: #dcfce7; color: #16a34a; }
+    .tier-fair    .tier-badge { background: #dbeafe; color: #1d4ed8; }
     .tier-caution .tier-badge { background: #ffedd5; color: #c2410c; }
 
-    .scenario-label {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #1a1a2e;
-    }
-
-    .scenario-sub {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      margin-top: 0.1rem;
-    }
+    .scenario-label { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; }
+    .scenario-sub   { font-size: 0.75rem; color: #9ca3af; margin-top: 0.1rem; }
 
     .num { font-weight: 700; font-size: 1rem; }
     .num.profit-pos { color: #16a34a; }
@@ -368,13 +405,141 @@
       color: #9ca3af;
       margin-bottom: 0.75rem;
     }
+
+    /* ── Terms of Agreement ── */
+    .terms-section {
+      max-width: 1100px;
+      margin: 1.5rem auto 0;
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.75rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .terms-section h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6366f1;
+      margin-bottom: 1.25rem;
+    }
+
+    .terms-block {
+      margin-bottom: 1rem;
+    }
+
+    .terms-block strong {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #374151;
+      margin-bottom: 0.3rem;
+    }
+
+    .terms-block p {
+      font-size: 0.88rem;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+
+    .sig-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1.5px solid #f3f4f6;
+    }
+
+    .sig-line {
+      border-bottom: 1.5px solid #374151;
+      padding-bottom: 0.25rem;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      @page { margin: 1.5cm; size: A4 portrait; }
+
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 11pt;
+        color: #000;
+      }
+
+      .print-btn { display: none !important; }
+
+      .card, .terms-section {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        break-inside: avoid;
+      }
+
+      .layout {
+        gap: 0.75rem;
+      }
+
+      .charge-rate-box {
+        background: #6366f1 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .bid-table tbody tr.tier-best    { background: #f0fdf4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .bid-table tbody tr.tier-fair    { background: #eff6ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .bid-table tbody tr.tier-caution { background: #fff7ed !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .finish-date-box { background: #f5f3ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      input, textarea, select {
+        border: 1px solid #d1d5db !important;
+        background: #fff !important;
+        box-shadow: none !important;
+      }
+
+      .add-btn, .remove-btn { display: none !important; }
+
+      .derived-field { background: #f9fafb !important; }
+
+      .terms-section { margin-top: 0.75rem; }
+
+      .page-header { margin-bottom: 1rem; }
+    }
   </style>
 </head>
 <body>
 
+  <button class="print-btn" onclick="window.print()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print / Save PDF
+  </button>
+
   <div class="page-header">
+    <div class="quote-title">Customer Quote</div>
     <h1>Project Bid Estimator</h1>
     <p>Calculate client charge rates and scenario profitability in seconds.</p>
+  </div>
+
+  <!-- Job Name + Scope of Work -->
+  <div class="meta-strip">
+    <div class="field-group">
+      <label>Job Name</label>
+      <input type="text" id="job-name" maxlength="20" placeholder="Job name (max 20 chars)" style="width:220px;" />
+    </div>
+    <div class="field-group">
+      <label>Scope of Work</label>
+      <textarea id="scope-of-work" maxlength="250" rows="2" placeholder="Describe the scope of work (max 250 characters)…"></textarea>
+    </div>
   </div>
 
   <div class="layout">
@@ -430,7 +595,7 @@
         </div>
       </div>
 
-      <div class="finish-date-row" id="finish-dates">
+      <div class="finish-date-row">
         <div class="finish-date-box">
           <div class="fd-label">🐇 Finish Date</div>
           <div class="fd-value empty" id="fd-under">—</div>
@@ -446,7 +611,7 @@
       </div>
     </div>
 
-    <!-- Output Section -->
+    <!-- Bid Summary -->
     <div class="card output-section">
       <h2><span class="icon">📊</span> Bid Summary</h2>
 
@@ -467,10 +632,54 @@
 
   </div>
 
+  <!-- Terms of Agreement -->
+  <div class="terms-section">
+    <h2>Terms of Agreement</h2>
+
+    <div class="terms-block">
+      <strong>Payment Terms</strong>
+      <p>Fixed fee contract with payments made to SVG bank with electronic function. Should work not be completed in full, Customer retains the right to withhold payments.</p>
+    </div>
+
+    <div class="terms-block">
+      <strong>Payment Schedule</strong>
+      <textarea id="payment-schedule" maxlength="500" rows="4" placeholder="Describe the payment schedule (max 500 characters)…"></textarea>
+    </div>
+
+    <div class="terms-block">
+      <strong>Project Delays</strong>
+      <p>Any work past the due date will be supplied at contractor cost, including material and weather delays.</p>
+    </div>
+
+    <div class="terms-block">
+      <strong>Materials</strong>
+      <p>Customer will provide requested raw materials at initiation of work.</p>
+    </div>
+
+    <div class="terms-block">
+      <strong>Supervision</strong>
+      <p>Contractor is responsible for oversight of all personnel brought on property. Property rules must be adhered to include smoke and drug free workplace.</p>
+    </div>
+
+    <div class="terms-block">
+      <strong>Additional Terms</strong>
+      <p>Contractor warranties all work for 6 month window. This agreement can be cancelled in writing by the Customer/Contractor at anytime.</p>
+      <p style="margin-top:0.5rem;">Contractor agrees to hold harmless and indemnify Customer against any and all claims of loss or damage, save for cases of willful misconduct or gross negligence. Contractor is responsible for carrying his/her own liability insurance for himself and subcontractors and/or employees of his company. Contractor is responsible for procuring all necessary licenses, permits, and/or inspections. This contract can not be modified except through written agreement by both parties.</p>
+    </div>
+
+    <div class="sig-row">
+      <div>
+        <div class="sig-line">Contractor Signature</div>
+      </div>
+      <div>
+        <div class="sig-line">Date</div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let personnelCount = 0;
 
-    // Set start date default to today in YYYY-MM-DD for the date input
     (function() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -482,7 +691,6 @@
     function addWorkingDays(startDate, days) {
       if (!startDate || isNaN(days) || days <= 0) return null;
       let date = new Date(startDate);
-      // Move past start day — finish date is end of the last working day
       let added = 0;
       while (added < days) {
         date.setDate(date.getDate() + 1);
@@ -503,10 +711,8 @@
     function addPersonnel() {
       if (personnelCount >= 5) return;
       personnelCount++;
-
       const list = document.getElementById('personnel-list');
       const id = personnelCount;
-
       const row = document.createElement('div');
       row.className = 'personnel-row';
       row.id = `person-row-${id}`;
@@ -528,7 +734,6 @@
         </div>
         ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : ''}
       `;
-
       list.appendChild(row);
       updateAddButton();
       calculate();
@@ -561,7 +766,6 @@
       const startDateVal = document.getElementById('start-date').value;
       const startDate = startDateVal ? new Date(startDateVal + 'T00:00:00') : null;
 
-      // Update per-person derived columns
       let totalDailyLabor = 0;
       document.querySelectorAll('input[id^="rate-"]').forEach(input => {
         const rawId = input.id.replace('rate-', '');
@@ -575,30 +779,19 @@
         if (clientEl) clientEl.textContent = rate > 0 ? fmt(clientRate) : '—';
       });
 
-      // Update finish dates
-      const fdUnder = document.getElementById('fd-under');
-      const fdAvg   = document.getElementById('fd-avg');
-      const fdOver  = document.getElementById('fd-over');
-
       function setFd(el, days) {
         const d = addWorkingDays(startDate, days);
-        if (d) {
-          el.textContent = fmtDate(d);
-          el.classList.remove('empty');
-        } else {
-          el.textContent = '—';
-          el.classList.add('empty');
-        }
+        if (d) { el.textContent = fmtDate(d); el.classList.remove('empty'); }
+        else    { el.textContent = '—';        el.classList.add('empty'); }
       }
-      setFd(fdUnder, daysUnder);
-      setFd(fdAvg, daysAvg);
-      setFd(fdOver, daysOver);
+      setFd(document.getElementById('fd-under'), daysUnder);
+      setFd(document.getElementById('fd-avg'),   daysAvg);
+      setFd(document.getElementById('fd-over'),  daysOver);
 
       const chargeDisplay = document.getElementById('charge-rate-display');
-      const tableWrap = document.getElementById('table-wrap');
-
+      const tableWrap     = document.getElementById('table-wrap');
       const markedUpDailyRate = totalDailyLabor * (1 + markup / 100);
-      const hasAvg = !isNaN(daysAvg) && daysAvg > 0;
+      const hasAvg  = !isNaN(daysAvg) && daysAvg > 0;
       const hasRates = totalDailyLabor > 0;
 
       if (!hasRates || !hasAvg) {
@@ -611,20 +804,17 @@
       chargeDisplay.textContent = fmt(fixedClientCharge);
 
       const scenarios = [];
-
       if (!isNaN(daysUnder) && daysUnder > 0) {
         const labor = totalDailyLabor * daysUnder;
-        scenarios.push({ tier: 'best', label: 'Speedy Work Estimate', days: daysUnder, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'best',    label: 'Speedy Work Estimate', days: daysUnder, labor, profit: fixedClientCharge - labor });
       }
-
       if (hasAvg) {
         const labor = totalDailyLabor * daysAvg;
-        scenarios.push({ tier: 'fair', label: 'Fair Estimate', days: daysAvg, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'fair',    label: 'Fair Estimate',        days: daysAvg,   labor, profit: fixedClientCharge - labor });
       }
-
       if (!isNaN(daysOver) && daysOver > 0) {
         const labor = totalDailyLabor * daysOver;
-        scenarios.push({ tier: 'caution', label: 'Slow Work Estimate', days: daysOver, labor, profit: fixedClientCharge - labor });
+        scenarios.push({ tier: 'caution', label: 'Slow Work Estimate',   days: daysOver,  labor, profit: fixedClientCharge - labor });
       }
 
       if (scenarios.length === 0) {
@@ -651,11 +841,7 @@
         <table class="bid-table">
           <thead>
             <tr>
-              <th>Scenario</th>
-              <th>Description</th>
-              <th>Days</th>
-              <th>Labor Cost</th>
-              <th>Profit</th>
+              <th>Scenario</th><th>Description</th><th>Days</th><th>Labor Cost</th><th>Profit</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -663,7 +849,6 @@
       `;
     }
 
-    // Init with one person
     addPersonnel();
   </script>
 
