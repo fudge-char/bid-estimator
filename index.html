@@ -64,6 +64,33 @@
       font-size: 0.95rem;
     }
 
+    /* Whale corner */
+    .whale-corner {
+      position: fixed;
+      top: 1rem;
+      left: 1.5rem;
+      font-size: 3rem;
+      line-height: 1;
+      z-index: 100;
+      user-select: none;
+    }
+
+    /* Customer fixed label */
+    .customer-field {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      background: #f5f3ff;
+      border: 1.5px solid #c4b5fd;
+      border-radius: 8px;
+      padding: 0.5rem 0.85rem;
+      width: 220px;
+    }
+
+    @media print {
+      .whale-corner { position: absolute; }
+    }
+
     /* Job Name / Scope strip */
     .meta-strip {
       max-width: 1100px;
@@ -594,6 +621,9 @@
 </head>
 <body>
 
+  <!-- Whale graphic top-left -->
+  <div class="whale-corner">🐋</div>
+
   <button class="print-btn" onclick="window.print()">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     Print / Save PDF
@@ -607,9 +637,12 @@
 
   <!-- Job Name + Scope of Work -->
   <div class="meta-strip">
-    <div class="field-group">
+    <div>
+      <div class="customer-field">Customer: Never Wanna Leave Ltd (Whale Song Estate)</div>
+      <div class="field-group" style="margin-top:0.6rem;">
       <label>Job Name</label>
       <input type="text" id="job-name" maxlength="20" placeholder="Job name (max 20 chars)" style="width:220px;" />
+      </div>
     </div>
     <div class="field-group">
       <label>Scope of Work</label>
