@@ -590,6 +590,7 @@
       @page { size: A1 portrait; margin: 1.2cm 1.5cm; }
 
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .no-print, #extra-scenarios { display: none !important; }
 
       body {
         background: #fff;
@@ -1180,7 +1181,7 @@
 
       const tierLabel = { best: '🐇 Best', fair: '🤝 Fair', caution: '🐢 Caution' };
 
-      const rows = scenarios.map(s => `
+      const makeRow = s => `
         <tr class="tier-${s.tier}">
           <td>
             <span class="tier-badge">${tierLabel[s.tier]}</span>
@@ -1193,8 +1194,24 @@
           <td class="num">${s.days}</td>
           <td class="num">${fmt(s.labor)}</td>
           <td class="num ${s.profit >= 0 ? 'profit-pos' : 'profit-neg'}">${fmt(s.profit)}</td>
+        </tr>`;
+
+      const fairScenario  = scenarios.find(s => s.tier === 'fair');
+      const otherScenarios = scenarios.filter(s => s.tier !== 'fair');
+
+      const fairRow   = fairScenario ? makeRow(fairScenario) : '';
+      const otherRows = otherScenarios.map(makeRow).join('');
+
+      const toggleBtn = otherRows ? `
+        <tr class="no-print">
+          <td colspan="5" style="text-align:center;padding:0.4rem 0;">
+            <button onclick="(function(b){var s=document.getElementById('extra-scenarios');var open=s.style.display!=='none';s.style.display=open?'none':'';b.textContent=open?'▼ Show Speedy &amp; Slow scenarios':'▲ Hide Speedy &amp; Slow scenarios';})(this)"
+              style="background:none;border:1px solid #d1d5db;border-radius:6px;padding:0.25rem 0.9rem;font-size:0.8rem;color:#6b7280;cursor:pointer;">
+              ▼ Show Speedy &amp; Slow scenarios
+            </button>
+          </td>
         </tr>
-      `).join('');
+        <tbody id="extra-scenarios" style="display:none;">${otherRows}</tbody>` : '';
 
       tableWrap.innerHTML = `
         <table class="bid-table">
@@ -1203,7 +1220,7 @@
               <th>Scenario</th><th>Description</th><th>Days</th><th>Labor Cost</th><th>Profit</th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody>${fairRow}${toggleBtn}</tbody>
         </table>
       `;
     }
