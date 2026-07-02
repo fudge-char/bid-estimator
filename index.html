@@ -261,6 +261,27 @@
 
     .add-btn:hover { background: #ede9fe; }
 
+    /* Fee row: markup + oversight + bonus side by side */
+    .fee-row {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    /* Bonus badge in Best row */
+    .bonus-badge {
+      display: inline-block;
+      margin-top: 0.3rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #16a34a;
+      background: #dcfce7;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      letter-spacing: 0.01em;
+    }
+
     /* Timeframe */
     .timeframe-grid {
       display: grid;
@@ -804,15 +825,15 @@
 
   <div class="layout">
 
-    <!-- Raw Labor Card -->
+    <!-- Labor Calculator Card -->
     <div class="card">
-      <h2><span class="icon">🛠️</span> Raw Labor</h2>
+      <h2><span class="icon">🛠️</span> Labor Calculator</h2>
 
       <div class="personnel-col-header">
         <span>Person / Daily Rate</span>
         <span></span>
-        <span>Daily Profit</span>
-        <span>Client Rate</span>
+        <span>Contractor Profit</span>
+        <span>Billed Client Rate</span>
       </div>
 
       <div id="personnel-list"></div>
@@ -821,11 +842,27 @@
 
       <hr class="divider" />
 
-      <div class="field-group">
-        <label>Markup on Daily Rate</label>
-        <div class="markup-input-wrap">
-          <input type="number" id="markup" min="0" max="999" step="0.1" value="12" oninput="calculate()" />
-          <span class="suffix">%</span>
+      <div class="fee-row">
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Overhead Markup</label>
+          <div class="markup-input-wrap">
+            <input type="number" id="markup" min="0" max="999" step="0.1" value="12" oninput="calculate()" />
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Construction Oversight Fee</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.9rem;pointer-events:none;">$</span>
+            <input type="number" id="oversight-fee" min="0" step="0.01" value="0" oninput="calculate()" style="padding-left:1.75rem;" />
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Construction Bonus</label>
+          <div style="position:relative;">
+            <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.9rem;pointer-events:none;">$</span>
+            <input type="number" id="bonus" min="0" step="0.01" value="0" oninput="calculate()" style="padding-left:1.75rem;" />
+          </div>
         </div>
       </div>
     </div>
@@ -871,14 +908,14 @@
       </div>
     </div>
 
-    <!-- Bid Summary -->
+    <!-- Labor Summary and Client Charges -->
     <div class="card output-section">
-      <h2><span class="icon">📊</span> Bid Summary</h2>
+      <h2><span class="icon">📊</span> Labor Summary and Client Charges</h2>
 
       <div class="charge-rate-box">
         <div>
           <div class="label">Fixed Client Charge (based on fair timeline)</div>
-          <div class="sub">Labor × Markup × Fair Days</div>
+          <div class="sub">Billed Client Rate × Fair Days + Construction Oversight Fee</div>
         </div>
         <div style="text-align:right">
           <div class="amount" id="charge-rate-display">—</div>
@@ -1034,11 +1071,11 @@
           </div>
         </div>
         <div class="field-group" style="margin-bottom:0;">
-          <label style="visibility:hidden;">Profit</label>
+          <label style="visibility:hidden;">Contractor Profit</label>
           <div class="derived-field profit" id="profit-${id}">—</div>
         </div>
         <div class="field-group" style="margin-bottom:0;">
-          <label style="visibility:hidden;">Client</label>
+          <label style="visibility:hidden;">Billed Client Rate</label>
           <div class="derived-field" id="client-rate-${id}">—</div>
         </div>
         ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : ''}
@@ -1088,6 +1125,9 @@
         if (clientEl) clientEl.textContent = rate > 0 ? fmt(clientRate) : '—';
       });
 
+      const oversightFee = parseFloat(document.getElementById('oversight-fee').value) || 0;
+      const bonusVal     = parseFloat(document.getElementById('bonus').value) || 0;
+
       function setFd(el, days) {
         const d = addWorkingDays(startDate, days);
         if (d) { el.textContent = fmtDate(d); el.classList.remove('empty'); }
@@ -1109,7 +1149,7 @@
         return;
       }
 
-      const fixedClientCharge = markedUpDailyRate * daysAvg;
+      const fixedClientCharge = markedUpDailyRate * daysAvg + oversightFee;
       chargeDisplay.textContent = fmt(fixedClientCharge);
 
       const scenarios = [];
@@ -1135,7 +1175,10 @@
 
       const rows = scenarios.map(s => `
         <tr class="tier-${s.tier}">
-          <td><span class="tier-badge">${tierLabel[s.tier]}</span></td>
+          <td>
+            <span class="tier-badge">${tierLabel[s.tier]}</span>
+            ${s.tier === 'best' && bonusVal > 0 ? `<div class="bonus-badge">${fmt(bonusVal)}</div>` : ''}
+          </td>
           <td>
             <div class="scenario-label">${s.label}</div>
             <div class="scenario-sub">Client billed ${fmt(fixedClientCharge)} regardless</div>
