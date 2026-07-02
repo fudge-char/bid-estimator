@@ -922,7 +922,11 @@
     <div class="card output-section">
       <h2><span class="icon">📊</span> Labor Summary and Client Charges</h2>
 
-      <div class="charge-rate-box">
+      <div id="table-wrap">
+        <div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>
+      </div>
+
+      <div class="charge-rate-box" style="background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);margin-top:1.5rem;margin-bottom:0.75rem;">
         <div>
           <div class="label">Fixed Client Charge (based on fair timeline)</div>
           <div class="sub">Billed Client Rate × Fair Days + Construction Oversight Fee</div>
@@ -932,8 +936,15 @@
         </div>
       </div>
 
-      <div id="table-wrap">
-        <div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>
+      <div class="charge-rate-box" style="background:linear-gradient(135deg,#0f766e 0%,#0d9488 100%);margin-bottom:0;">
+        <div>
+          <div class="label">Bonus Potential</div>
+          <div class="sub">Based on quality of work, speed of completion, and within specified materials budget.</div>
+          <div class="sub" style="margin-top:0.4rem;">Bonus <span id="bonus-display">—</span> &nbsp;|&nbsp; Total Potential Compensation <span id="total-comp-display">—</span></div>
+        </div>
+        <div style="text-align:right">
+          <div class="amount" id="bonus-amount-display">—</div>
+        </div>
       </div>
     </div>
 
@@ -956,34 +967,12 @@
 
       <div class="terms-block">
         <strong>Scope of Services</strong>
-        <p>The Contractor may be engaged to perform:</p>
-        <ul>
-          <li>Construction supervision</li>
-          <li>Renovations</li>
-          <li>Capital improvements</li>
-          <li>Project management</li>
-          <li>Procurement</li>
-          <li>Trade coordination</li>
-          <li>Quality inspections</li>
-          <li>Scheduling</li>
-          <li>Site safety management</li>
-        </ul>
-        <p>Each project requires separate approval. No minimum work is guaranteed.</p>
+        <p>The Contractor may be engaged to perform: Construction supervision, Renovations, Capital improvements, Project management, Procurement, Trade coordination, Quality inspections, Scheduling, and Site safety management. Each project requires separate approval. No minimum work is guaranteed.</p>
       </div>
 
       <div class="terms-block">
         <strong>Contractor Responsibilities</strong>
-        <p>The Contractor shall:</p>
-        <ul>
-          <li>Supply qualified personnel.</li>
-          <li>Hire and supervise subcontractors.</li>
-          <li>Maintain all necessary licenses and permits.</li>
-          <li>Ensure compliance with applicable building regulations.</li>
-          <li>Maintain safe working practices.</li>
-          <li>Obtain required insurance.</li>
-          <li>Correct defective workmanship at its own expense.</li>
-          <li>Deliver projects in accordance with agreed schedules.</li>
-        </ul>
+        <p>The Contractor shall: Supply qualified personnel; Hire and supervise subcontractors; Maintain all necessary licenses and permits; Ensure compliance with applicable building regulations; Maintain safe working practices; Obtain required insurance; Correct defective workmanship at its own expense; and Deliver projects in accordance with agreed schedules.</p>
       </div>
 
       <div class="terms-block">
@@ -1225,14 +1214,24 @@
       const hasAvg  = !isNaN(daysAvg) && daysAvg > 0;
       const hasRates = totalDailyLabor > 0;
 
+      const bonusDisplay     = document.getElementById('bonus-display');
+      const bonusAmtDisplay  = document.getElementById('bonus-amount-display');
+      const totalCompDisplay = document.getElementById('total-comp-display');
+
       if (!hasRates || !hasAvg) {
         chargeDisplay.textContent = '—';
+        bonusDisplay.textContent = '—';
+        bonusAmtDisplay.textContent = '—';
+        totalCompDisplay.textContent = '—';
         tableWrap.innerHTML = '<div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>';
         return;
       }
 
       const fixedClientCharge = markedUpDailyRate * daysAvg + oversightFee;
       chargeDisplay.textContent = fmt(fixedClientCharge);
+      bonusDisplay.textContent = fmt(bonusVal);
+      bonusAmtDisplay.textContent = fmt(bonusVal);
+      totalCompDisplay.textContent = fmt(fixedClientCharge + bonusVal);
 
       const scenarios = [];
       if (!isNaN(daysUnder) && daysUnder > 0) {
