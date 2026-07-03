@@ -189,7 +189,7 @@
     /* Personnel */
     .personnel-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-columns: 2fr 1fr;
       gap: 0.6rem;
       margin-bottom: 0.75rem;
       align-items: end;
@@ -197,7 +197,7 @@
 
     .personnel-col-header {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-template-columns: 2fr 1fr 1fr;
       gap: 0.6rem;
       margin-bottom: 0.25rem;
     }
@@ -212,7 +212,7 @@
     }
 
     .personnel-row .remove-btn {
-      grid-column: span 4;
+      grid-column: span 2;
       justify-self: end;
       background: none;
       border: none;
@@ -842,7 +842,6 @@
       <div class="personnel-col-header">
         <span>Person / Daily Rate</span>
         <span></span>
-        <span>Contractor Profit</span>
         <span>Billed Client Rate</span>
       </div>
 
@@ -952,7 +951,7 @@
   </div>
 
   <!-- Terms of Agreement -->
-  <div style="background:#e5e7eb;padding:1rem 1.5rem 0.25rem;text-align:center;">
+  <div style="background:#e5e7eb;padding:1rem 1.5rem 0.25rem;text-align:center;page-break-before:always;break-before:page;">
     <h2 style="font-size:1.4rem;font-weight:800;letter-spacing:0.05em;color:#1e293b;margin:0;">Independent Construction Agreement</h2>
   </div>
   <div class="terms-section">
@@ -1135,20 +1134,17 @@
       row.className = 'personnel-row';
       row.id = `person-row-${id}`;
       row.innerHTML = `
-        <div class="field-group" style="margin-bottom:0;grid-column:span 2;">
+        <div class="field-group" style="margin-bottom:0;">
           <label>Person ${id} — Daily Rate</label>
           <div style="position:relative;">
             <input type="number" id="rate-${id}" min="0" step="0.01" placeholder="0 XCD" oninput="calculate()" style="padding-right:2rem;" />
             <span style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:0.9rem;pointer-events:none;">$</span>
           </div>
         </div>
-        <div class="field-group" style="margin-bottom:0;">
-          <label style="visibility:hidden;">Contractor Profit</label>
-          <div class="derived-field profit" id="profit-${id}">—</div>
-        </div>
+        <div class="derived-field profit" id="profit-${id}" style="display:none;">—</div>
         <div class="field-group" style="margin-bottom:0;">
           <label style="visibility:hidden;">Billed Client Rate</label>
-          <div class="derived-field" id="client-rate-${id}">—</div>
+          <div class="derived-field" id="client-rate-${id}" style="font-size:1.25rem;font-weight:800;">—</div>
         </div>
         ${id > 1 ? `<button class="remove-btn" onclick="removePersonnel(${id})">✕ Remove</button>` : ''}
       `;
