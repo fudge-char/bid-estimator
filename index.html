@@ -1216,13 +1216,11 @@
       const hasRates = totalDailyLabor > 0;
 
       const bonusDisplay     = document.getElementById('bonus-display');
-      const bonusAmtDisplay  = document.getElementById('bonus-amount-display');
       const totalCompDisplay = document.getElementById('total-comp-display');
 
       if (!hasRates || !hasAvg) {
         chargeDisplay.textContent = '—';
         bonusDisplay.textContent = '—';
-        bonusAmtDisplay.textContent = '—';
         totalCompDisplay.textContent = '—';
         tableWrap.innerHTML = '<div class="empty-state">Enter labor rates, markup, and timeframe to see your bid scenarios.</div>';
         return;
@@ -1231,7 +1229,6 @@
       const fixedClientCharge = markedUpDailyRate * daysAvg + oversightFee;
       chargeDisplay.textContent = fmt(fixedClientCharge);
       bonusDisplay.textContent = fmt(bonusVal);
-      bonusAmtDisplay.textContent = fmt(bonusVal);
       totalCompDisplay.textContent = fmt(fixedClientCharge + bonusVal);
 
       const scenarios = [];
